@@ -4,6 +4,8 @@ import speech_recognition as sr
 
 openai.api_key = "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"
 
+queries = []
+
 def gpt(stext):
     response = openai.Completion.create(
     engine="text-davinci-003",
