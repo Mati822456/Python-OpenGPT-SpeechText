@@ -2,7 +2,7 @@ import openai
 import pyttsx3
 import speech_recognition as sr
 
-openai.api_key = "KEY"
+openai.api_key = "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"
 
 def gpt(stext):
     response = openai.Completion.create(
@@ -18,7 +18,6 @@ def gpt(stext):
     print(response)
     return response.choices[0].text
 
-
 def sayResponse(sentence):
     engine = pyttsx3.init()
     voices = engine.getProperty('voices')
@@ -28,7 +27,6 @@ def sayResponse(sentence):
     engine.say(sentence)
     engine.runAndWait()
     engine.stop()
-
 
 def recognizeSpeech():
     r = sr.Recognizer()
@@ -47,5 +45,4 @@ def recognizeSpeech():
         print('Cannot recognize your voice')
         sayResponse('Cannot recognize your voice')
 
-
-recognizeSpeech()
+#recognizeSpeech()
