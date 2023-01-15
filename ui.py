@@ -1,14 +1,13 @@
 # from PySide6.QtCore import QSize, QRect, Qt
 # from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QSizePolicy
 # from PySide6.QtGui import QIcon
-import sys
-from datetime import datetime
-from random import randint
-
 from PySide6.QtCore import *
-from PySide6.QtGui import *
 from PySide6.QtWidgets import *
+from PySide6.QtGui import *
 
+import sys
+
+from datetime import datetime
 import main
 
 
@@ -26,59 +25,9 @@ class AnotherWindow(QWidget):
 
 
 #TODO
-#stare QueryWindow pod nowym BEZ PRZERWY POMIĘDZY (funkcja (dodatnie wartości, malejąca, max-i) (stretch)?))
-#ogarnąć (naprawić) przerywanie słuchania (nowa klasa przyciksu DONE)
-
-
-class CustomPropertiesButton(QPushButton):
-    """
-    Class dedicated to buttons that require 'states' for them to work as intended.
-    Regular QPushButton subclass, except with additional instance variables.
-    All of the attributes passed by **kwargs are held in `properties_dict` dictionary (instance attribute).
-    Attributes already existing in the parent class are not modifiable and their names cannot be duplicated by custom attributes.
-
-    `properties_dict` = dictionary made of attributes given via **kwargs
-    """
-    def __init__(self, parent, **kwargs):
-        super().__init__(parent)
-
-        #self._default_dict = self.__dict__.copy()
-        #self.properties_dict = {}
-        ##adding **kwargs elements that are new (their keys are not in `self._default_dict`)
-        #self.__dict__.update({key: val for key, val in kwargs.items() if not key in list(self._default_dict.keys()) and key != "properties_dict" and key != "_default_dict"})
-        #adding __dict__ elements that are new (their keys are not in `self._default_dict`)
-        # so basically adding elements that were just added to __dict__ from **kwargs
-        #^outdated
-        self.properties_dict = {key: val for key, val in kwargs.items() if not key in list(self.__dict__.keys()) and key != "properties_dict" and key != "_default_dict"}
-
-        #print(self.__dict__.items())
-    
-    def set_property(self, **kwargs):
-        """
-        set_property(attr_name1 = attr_value1, attr_name2 = attr_value2, ...)
-
-        Sets a value to the attribute.
-        Adds new attribute if the attribute doesn't already exist and sets a value for it.
-        """
-        #self.__dict__.update({key: val for key, val in kwargs.items() if not key in list(self._default_dict.keys()) and key != "properties_dict" and key != "_default_dict"})
-        #print(kwargs.keys()[0] in list(self._default_dict.keys()))
-        self.properties_dict.update({key: val for key, val in kwargs.items() if not key in list(self.__dict__.keys()) and key != "properties_dict" and key != "_default_dict"})
-        #self.__dict__.update(self.__dict__.pop("properties_dict"))
-
-    def get_property(self, name:str=None):
-        """
-        Returns the value for the given key (`name`).
-        If given key does not exist, whole dictionary with all coder-defined instance attributes is returned.
-        If no parameters are provided, whole dictionary with all coder-defined instance attributes is returned.
-        """
-        try:
-            if name==None:
-                raise KeyError
-            return self.properties_dict[name]
-        except KeyError as ke:
-            print(ke)
-            return self.properties_dict
-
+#w QueryWindow: rozszerzenie qlabel(self.message), qlabel(self.response)
+#dodawanie nowych QueryWindow nad starymi, zamiast pod (tak jak teraz)
+#(rozmieszczanie widget'ów w layout'cie i zmiana ich wielkości)
 
 class QueryWindow(QFrame):
     """
@@ -120,7 +69,7 @@ class QueryWindow(QFrame):
 
         layout_1 = QHBoxLayout()
         layout_1.setStretch(1, 0)
-        layout_1.setSpacing(43) #odstęp między opisem (QLabel("Data")) a wartością (QLabel(self.date))
+        layout_1.setSpacing(45) #odstęp między opisem (QLabel("Data")) a wartością (QLabel(self.date))
         label = QLabel("Data", self)
         label.setObjectName(u"label")
         #label.setAlignment(Qt.AlignLeft)
@@ -149,7 +98,7 @@ class QueryWindow(QFrame):
 
         layout.addLayout(layout_2, 0, 1, alignment = Qt.AlignTop|Qt.AlignRight)
 
-        expanding_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding) #rozszerzanie label w dół (QSizePolicy)
+        expanding_policy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding) #rozszerzanie label w dół (QSizePolicy)
 
         layout_3 = QHBoxLayout()
         layout_3.setSpacing(29)
@@ -164,10 +113,8 @@ class QueryWindow(QFrame):
         self.label_val_3.setTextInteractionFlags(Qt.TextSelectableByMouse)
         self.label_val_3.setSizePolicy(expanding_policy) #rozszerzanie label w dół
         self.label_val_3.setWordWrap(True) #zawijanie słów do nowej linijki
-        self.label_val_3.setScaledContents(True)
         layout_3.addWidget(label_3, alignment = Qt.AlignTop|Qt.AlignLeft)
-        layout_3.addWidget(self.label_val_3) #, alignment = Qt.AlignTop|Qt.AlignLeft)
-        #ALIGNMENT POWODUJE IGNOROWANIE SIZEPOLICY PRZEZ CO LABEL NIE ZAJMUJE CAŁEGO MIEJSCA!!!
+        layout_3.addWidget(self.label_val_3, alignment = Qt.AlignTop|Qt.AlignLeft)
 
         layout.addLayout(layout_3, 1, 0, 1, 2, alignment = Qt.AlignTop|Qt.AlignLeft)
 
@@ -192,8 +139,7 @@ class QueryWindow(QFrame):
         self.label_val_4.setSizePolicy(expanding_policy)
         self.label_val_4.setWordWrap(True)
         layout_4.addWidget(label_4, alignment = Qt.AlignTop|Qt.AlignLeft)
-        layout_4.addWidget(self.label_val_4) #, 1,  alignment = Qt.AlignTop|Qt.AlignLeft)
-        #ALIGNMENT POWODUJE IGNOROWANIE SIZEPOLICY PRZEZ CO LABEL NIE ZAJMUJE CAŁEGO MIEJSCA!!!
+        layout_4.addWidget(self.label_val_4, alignment = Qt.AlignTop|Qt.AlignLeft)
 
         layout.addLayout(layout_4, 2, 0, 1, 2, alignment = Qt.AlignTop|Qt.AlignLeft)
 
@@ -209,9 +155,9 @@ class QueryWindow(QFrame):
         self.message = message
         self.response = response
         self.tokens = tokens
-        #self.date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        #self.label_val.setText(str(self.date))
+        self.label_val.setText(str(self.date))
         self.label_val_2.setText(str(self.tokens))
         self.label_val_3.setText(str(self.message))
         self.label_val_4.setText(str(self.response))
@@ -221,14 +167,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        #test = CustomPropertiesButton(self, clicked="test o", test2 = 201)
-        #print(test.__dict__, '\n', test.get_property(), '\n')
-        #test.set_property(test1="test zmiana", test2='nanana nanana', test3=test.get_property('test2'))
-        #test.set_property(toggled = "!-/ERRA!"*5, sth = 'sOMnia', properties_dict = None, _default_dict = "aeea!!!!eaaaaSSSSaeaeae")
-        #test.set_property(test2 = 4444)
-        #print(test.__dict__, '\n', test.get_property('__dict__'))
-
-        self.i = 0 #useful with iteration over queries, but easily replacable by vbox.count()
+        self.i = 0
 
         #self.setBaseSize(600, 800)
         self.setFixedSize(600, 800)
@@ -240,7 +179,7 @@ class MainWindow(QMainWindow):
 
         button_layout = QVBoxLayout()
 
-        button = CustomPropertiesButton(self)
+        button = QPushButton(self)
         button.setGeometry(QRect(0, 0, 128, 128))
         #layout.addWidget(button, 1, 1) #
         icon = QIcon()
@@ -261,7 +200,7 @@ class MainWindow(QMainWindow):
 
         layout.addLayout(button_layout, 1, 1, alignment = Qt.AlignCenter)
 
-        button2 = CustomPropertiesButton(self)
+        button2 = QPushButton(self)
         icon.addFile(u"stop.png", QSize(), QIcon.Normal, QIcon.Off)
         button2.setIcon(icon)
         button2.setIconSize(QSize(56, 56))
@@ -285,7 +224,7 @@ class MainWindow(QMainWindow):
         "")
         widget.setLayout(vbox)
 
-        #scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff) #only if mainwindow resizable
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scroll.setWidgetResizable(True)
         scroll.setWidget(widget)
 
@@ -294,38 +233,18 @@ class MainWindow(QMainWindow):
         mainWidget.setLayout(layout)
         self.setCentralWidget(mainWidget)
 
-        button.clicked.connect(lambda: self.new_query(vbox, button, button2))
-        button2.clicked.connect(lambda: self.stop_query(vbox, button, button2))
+        button.clicked.connect(lambda: self.new_query(vbox, button))
 
-    def new_query(self, vbox:QVBoxLayout, listen_button:QPushButton, stop_button:QPushButton):
-        print("click")
+    def new_query(self, vbox:QVBoxLayout, button:QPushButton):
+        print("clicked")
 
-        losmes = ["THIS IS A MASSAGE ", "LIE DOWN ", "On your knees~ ", "UwU OwO ", "totallyrandom "]
-        losres = ["res ", "rez ", "rizz ", "jizz ", "cock! ", "chalk! ", "chuck! ", "hwat else... "]
-
-        if listen_button.isChecked():
-            print("checked")
+        if button.isChecked():
             new_query_window = QueryWindow(tokens=1000)
-            vbox.insertWidget(0, new_query_window, (1000-vbox.count()), alignment=Qt.AlignTop)
+            vbox.addWidget(new_query_window, self.i, alignment=Qt.AlignTop)
         else:
-            print("unchecked")
-            try:
-                vbox.itemAt(0).widget().update_variables_in_labels(
-                    message=''.join([losmes[randint(0, len(losmes))-1] for i in range(randint(5,30))]), 
-                    response=''.join([losres[randint(0, len(losres))-1] for i in range(randint(5,30))]), 
-                    tokens=self.i)
-            except AttributeError as ae:
-                print("uh oh, deleted before i could fill it up ÓmÓ\n"+str(ae))
+            vbox.itemAt(self.i).widget().update_variables_in_labels(message="aasfvhasf "*50, response="Easzxv "*50, tokens=1000-50)
             self.i+=1
     
-    def stop_query(self, vbox:QVBoxLayout, listen_button:QPushButton, stop_button:QPushButton):
-        if listen_button.isChecked():
-            print("stop query")
-            qw = vbox.takeAt(0)
-            qw.widget().deleteLater()
-        else:
-            print("DELETE MODE")
-
     def show_new_window(self, checked):
         w = AnotherWindow()
         w.show()
